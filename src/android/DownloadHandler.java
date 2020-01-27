@@ -100,8 +100,9 @@ public class DownloadHandler extends Handler {
 
         LOG.d(TAG, "APK Filename: " + apkFile.toString());
 
+        // @srserx: OLD CODE
         // 通过Intent安装APK文件
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+        /*if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             LOG.d(TAG, "Build SDK Greater than or equal to Nougat");
             String applicationId = (String) BuildHelper.getBuildConfigValue((Activity) mContext, "APPLICATION_ID");
             Uri apkUri = FileProvider.getUriForFile(mContext, applicationId + ".appupdate.provider", apkFile);
@@ -115,7 +116,24 @@ public class DownloadHandler extends Handler {
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.setDataAndType(Uri.parse("file://" + apkFile.toString()), "application/vnd.android.package-archive");
             mContext.startActivity(i);
+        }*/
+
+        // @srserx: new code because it crashed
+        Uri apkUri = null;
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            LOG.d(TAG, "Build SDK Greater than or equal to Nougat");
+            String applicationId = (String) BuildHelper.getBuildConfigValue((Activity) mContext, "APPLICATION_ID");
+            apkUri = FileProvider.getUriForFile(mContext, applicationId + ".appupdate.provider", apkFile);
+        }else {
+            LOG.d(TAG, "Build SDK less than Nougat");
+            apkUri = Uri.parse("file://" + apkFile.toString());
         }
 
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.setDataAndType(apkUri, "application/vnd.android.package-archive");
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        mContext.startActivity(i);
     }
 }
